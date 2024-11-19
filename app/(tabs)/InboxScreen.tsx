@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, FlatList } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context'; // Import SafeAreaView
 import EmailService from '../services/emailService';
 
 const InboxScreen = () => {
@@ -23,15 +24,17 @@ const InboxScreen = () => {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Loading inbox...</Text>
-      </View>
+      <SafeAreaView style={{ flex: 1 }}> {/* SafeAreaView for full-screen loading */}
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#0000ff" />
+          <Text>Loading inbox...</Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={{ flex: 1, padding: 16 }}>
+    <SafeAreaView style={{ flex: 1, padding: 16 }}> {/* SafeAreaView wrapping the main content */}
       <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 16 }}>Inbox</Text>
       <FlatList
         data={emails}
@@ -43,7 +46,7 @@ const InboxScreen = () => {
           </View>
         )}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
