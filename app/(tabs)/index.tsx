@@ -5,6 +5,8 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
+import { Link, router } from 'expo-router';
+
 export default function HomeScreen() {
   return (
     <ParallaxScrollView
@@ -45,6 +47,9 @@ export default function HomeScreen() {
           <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
           <ThemedText type="defaultSemiBold">app-example</ThemedText>.
         </ThemedText>
+      </ThemedView>
+      <ThemedView style={styles.stepContainer}>
+        <ThemedText type="subtitle"><Link href="../playgroundInbox">Click to move to Playground</Link></ThemedText>
       </ThemedView>
     </ParallaxScrollView>
   );
