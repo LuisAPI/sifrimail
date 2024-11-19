@@ -1,13 +1,34 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { Image, StyleSheet, Platform, Button, View, Text } from 'react-native';
+import { useEffect, useState } from 'react';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
-import { Link, router } from 'expo-router';
+import { Link } from 'expo-router';
+import EmailService from '../services/emailService'; // Import the email service
 
 export default function HomeScreen() {
+  const [emails, setEmails] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch emails on component mount
+  useEffect(() => {
+    const loadEmails = async () => {
+      try {
+        const messages = await EmailService.fetchEmails();
+        setEmails(messages); // Store fetched emails in state
+      } catch (error) {
+        console.error('Failed to load emails:', error);
+      } finally {
+        setLoading(false); // Stop loading once done
+      }
+    };
+
+    loadEmails();
+  }, []);
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -16,40 +37,52 @@ export default function HomeScreen() {
           source={require('@/assets/images/partial-react-logo.png')}
           style={styles.reactLogo}
         />
-      }>
+      }
+    >
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Welcome!</ThemedText>
         <HelloWave />
       </ThemedView>
+
+      {/* Display the inbox */}
       <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
+        <ThemedText type="subtitle">Inbox</ThemedText>
+        {loading ? (
+          <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+            <Text>Loading inbox...</Text>
+          </View>
+        ) : (
+          <View style={{ marginBottom: 12 }}>
+            {emails.length > 0 ? (
+              emails.map((email, index) => (
+                <View key={index} style={{ marginBottom: 12, padding: 8, borderBottomWidth: 1 }}>
+                  <Text style={{ fontWeight: 'bold' }}>{email.envelope.subject}</Text>
+                  <Text>{email.envelope.from[0].address}</Text>
+                </View>
+              ))
+            ) : (
+              <Text>No emails found</Text>
+            )}
+          </View>
+        )}
+      </ThemedView>
+
+      {/* Keep the developer link to the playground accessible but hidden */}
+      <ThemedView style={styles.stepContainer}>
+        <ThemedText type="subtitle">
+          <Link href="../playgroundInbox">Click to move to Playground</Link>
         </ThemedText>
       </ThemedView>
+
+      {/* Optional: You can add a button to toggle the inbox view */}
       <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle"><Link href="../playgroundInbox">Click to move to Playground</Link></ThemedText>
+        <Button
+          title="Go to Playground"
+          onPress={() => {
+            // This is just for developer testing
+            console.log("Navigating to Playground");
+          }}
+        />
       </ThemedView>
     </ParallaxScrollView>
   );
