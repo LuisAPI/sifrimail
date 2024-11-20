@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context'; // Import SafeAreaView
-import EmailService from '../services/emailService';
+import EmailService from '../../services/emailService';
 
 const InboxScreen = () => {
   const [emails, setEmails] = useState([]);
