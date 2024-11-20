@@ -13,12 +13,13 @@ import EmailService from '../services/emailService'; // Import the email service
 export default function HomeScreen() {
   const [emails, setEmails] = useState([]);
   const [loading, setLoading] = useState(true);
+  const emailService = new EmailService('gmail'); // Or 'outlook'
 
   // Fetch emails on component mount
   useEffect(() => {
     const loadEmails = async () => {
       try {
-        const messages = await EmailService.fetchEmails();
+        const messages = await emailService.fetchEmails();
         setEmails(messages); // Store fetched emails in state
       } catch (error) {
         console.error('Failed to load emails:', error);
@@ -58,8 +59,7 @@ export default function HomeScreen() {
               {emails.length > 0 ? (
                 emails.map((email, index) => (
                   <View key={index} style={{ marginBottom: 12, padding: 8, borderBottomWidth: 1 }}>
-                    <Text style={{ fontWeight: 'bold' }}>{email.envelope.subject}</Text>
-                    <Text>{email.envelope.from[0].address}</Text>
+                    <Text style={{ fontWeight: 'bold' }}>{email.snippet}</Text>
                   </View>
                 ))
               ) : (
