@@ -1,6 +1,6 @@
 import { Image, StyleSheet, Platform, Button, View, Text } from 'react-native';
 import { useEffect, useState } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context'; // Import SafeAreaView
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -8,10 +8,17 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
 import { Link } from 'expo-router';
-import EmailService from '../services/emailService'; // Import the email service
+import EmailService from '../services/emailService';
+
+// Define the structure of the email object
+interface Email {
+  snippet: string;
+  // Add other properties here if necessary, like subject, from, etc.
+}
 
 export default function HomeScreen() {
-  const [emails, setEmails] = useState([]);
+  // Use the Email type in the state definition
+  const [emails, setEmails] = useState<Email[]>([]);
   const [loading, setLoading] = useState(true);
   const emailService = new EmailService('gmail'); // Or 'outlook'
 
@@ -32,7 +39,7 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    <SafeAreaView style={{ flex: 1 }}> {/* Wrap the main content */}
+    <SafeAreaView style={{ flex: 1 }}>
       <ParallaxScrollView
         headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
         headerImage={

@@ -3,7 +3,6 @@ import axios from 'axios';
 
 // Constants
 const OUTLOOK_API_BASE_URL = 'https://graph.microsoft.com/v1.0';
-
 const CLIENT_ID = '<YOUR_OUTLOOK_CLIENT_ID>';
 const REDIRECT_URI = makeRedirectUri();  // No need for useProxy now
 const SCOPES = ['https://graph.microsoft.com/Mail.Read', 'https://graph.microsoft.com/Mail.Send'];
@@ -23,12 +22,11 @@ async function authenticateOutlook(): Promise<void> {
     clientId: CLIENT_ID,
     redirectUri: REDIRECT_URI,
     scopes: SCOPES,
-    discovery: discovery,  // Pass the discovery document
     responseType: 'token',
-  });
+  }); // Providing the discovery document here
 
   // Make the auth request asynchronously
-  const result: AuthSessionResult = await request.promptAsync();
+  const result: AuthSessionResult = await request.promptAsync(discovery);
 
   // Parse the result and store the token
   if (result.type === 'success' && result.params.access_token) {
