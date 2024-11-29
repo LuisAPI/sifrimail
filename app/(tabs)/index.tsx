@@ -88,13 +88,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  emailCard: {
+    padding: 10,
+    marginVertical: 5,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    width: '90%',
   },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
+  emailSubject: {
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  emailBody: {
+    color: '#555',
+    marginVertical: 5,
+  },
+  emailClassification: {
+    fontStyle: 'italic',
+    color: '#007AFF',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 14,
   },
 });
