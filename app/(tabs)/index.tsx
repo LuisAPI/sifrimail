@@ -3,10 +3,9 @@ import { StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import Constants from 'expo-constants';
 
-import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
 
-const Inbox = () => {
+const Inbox = ({ grantId }: { grantId: string }) => { // Pass grant_id as a prop
   const [emails, setEmails] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,15 +17,27 @@ const Inbox = () => {
     try {
       const API_URL = Constants.expoConfig?.extra?.apiUrl; // Access API_URL safely
 
-      console.log('API_URL:', API_URL);
-      
       // Fetch and classify emails using the API_URL
-      const emailResponse = await axios.get(`${API_URL}/nylas/recent-emails`);
+      const emailResponse = await axios.get(`${API_URL}/nylas/recent-emails`, {
+        headers: {
+          Authorization: `Bearer ${grantId}`, // Include grant_id
+        },
+      });
+
       const fetchedEmails = emailResponse.data;
 
-      const classificationResponse = await axios.post(`${API_URL}/classify-emails`, {
-        emails: fetchedEmails,
-      });
+      // Classify emails
+      const classificationResponse = await axios.post(
+        `${API_URL}/classify-emails`,
+        {
+          emails: fetchedEmails.map((email: any) => email.snippet), // Pass only snippets to classify
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${grantId}`, // Include grant_id for the classifier too, if needed
+          },
+        }
+      );
       const classifiedEmails = classificationResponse.data.predictions;
 
       const emailsWithClassification = fetchedEmails.map((email: any, index: number) => ({
