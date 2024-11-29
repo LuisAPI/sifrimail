@@ -3,10 +3,9 @@ import { StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import Constants from 'expo-constants';
 
-import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
 
-const Inbox = () => {
+const Inbox = ({ grantId }: { grantId: string }) => { // Pass grant_id as a prop
   const [emails, setEmails] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,15 +17,27 @@ const Inbox = () => {
     try {
       const API_URL = Constants.expoConfig?.extra?.apiUrl; // Access API_URL safely
 
-      console.log('API_URL:', API_URL);
-      
       // Fetch and classify emails using the API_URL
-      const emailResponse = await axios.get(`${API_URL}/nylas/recent-emails`);
+      const emailResponse = await axios.get(`${API_URL}/nylas/recent-emails`, {
+        headers: {
+          Authorization: `Bearer ${grantId}`, // Include grant_id
+        },
+      });
+
       const fetchedEmails = emailResponse.data;
 
-      const classificationResponse = await axios.post(`${API_URL}/classify-emails`, {
-        emails: fetchedEmails,
-      });
+      // Classify emails
+      const classificationResponse = await axios.post(
+        `${API_URL}/classify-emails`,
+        {
+          emails: fetchedEmails.map((email: any) => email.snippet), // Pass only snippets to classify
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${grantId}`, // Include grant_id for the classifier too, if needed
+          },
+        }
+      );
       const classifiedEmails = classificationResponse.data.predictions;
 
       const emailsWithClassification = fetchedEmails.map((email: any, index: number) => ({
@@ -71,31 +82,34 @@ const Inbox = () => {
 
 export default Inbox;
 
-/*
-export default function TabOneScreen() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>aaaaa</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
-    </View>
-  );
-}
-*/
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  emailCard: {
+    padding: 10,
+    marginVertical: 5,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    width: '90%',
   },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
+  emailSubject: {
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  emailBody: {
+    color: '#555',
+    marginVertical: 5,
+  },
+  emailClassification: {
+    fontStyle: 'italic',
+    color: '#007AFF',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 14,
   },
 });
