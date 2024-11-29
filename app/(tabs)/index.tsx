@@ -16,8 +16,10 @@ const Inbox = () => {
     setError(null);
 
     try {
-      const API_URL = Constants.manifest.extra.apiUrl; // Access the API_URL from app.config.js
+      const API_URL = Constants.expoConfig?.extra?.apiUrl; // Access API_URL safely
 
+      console.log('API_URL:', API_URL);
+      
       // Fetch and classify emails using the API_URL
       const emailResponse = await axios.get(`${API_URL}/nylas/recent-emails`);
       const fetchedEmails = emailResponse.data;
