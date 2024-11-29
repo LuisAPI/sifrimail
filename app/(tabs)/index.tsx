@@ -82,18 +82,6 @@ const Inbox = ({ grantId }: { grantId: string }) => { // Pass grant_id as a prop
 
 export default Inbox;
 
-/*
-export default function TabOneScreen() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>aaaaa</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
-    </View>
-  );
-}
-*/
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
