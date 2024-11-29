@@ -30,13 +30,15 @@ export default {
       favicon: "./assets/images/favicon.png"
     },
     plugins: [
-      "expo-router"
+      "expo-router",
+      "expo-secure-store"
     ],
     experiments: {
       typedRoutes: true
     },
     extra: {
-      apiUrl: process.env.BACKEND_URL || "http://127.0.0.1:5000"
+      apiUrl: process.env.BACKEND_URL || "http://127.0.0.1:5000",
+      grantId: process.env.NYLAS_AUTH_ID
     }
   }
 };

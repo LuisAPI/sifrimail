@@ -10,7 +10,17 @@ const Inbox = ({ grantId }: { grantId: string }) => { // Pass grant_id as a prop
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fallbackGrantId = Constants.expoConfig?.extra?.grantId; // Fallback from app.config.js
+
+  const actualGrantId = grantId || fallbackGrantId; // Use the provided or fallback grant ID
+
   const fetchAndClassifyEmails = async () => {
+    if (!actualGrantId) {
+      setError('No valid grant ID available');
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -20,7 +30,7 @@ const Inbox = ({ grantId }: { grantId: string }) => { // Pass grant_id as a prop
       // Fetch and classify emails using the API_URL
       const emailResponse = await axios.get(`${API_URL}/nylas/recent-emails`, {
         headers: {
-          Authorization: `Bearer ${grantId}`, // Include grant_id
+          Authorization: `Bearer ${actualGrantId}`, // Include grant_id
         },
       });
 
@@ -34,7 +44,7 @@ const Inbox = ({ grantId }: { grantId: string }) => { // Pass grant_id as a prop
         },
         {
           headers: {
-            Authorization: `Bearer ${grantId}`, // Include grant_id for the classifier too, if needed
+            Authorization: `Bearer ${actualGrantId}`, // Include grant_id for the classifier too, if needed
           },
         }
       );
@@ -55,7 +65,7 @@ const Inbox = ({ grantId }: { grantId: string }) => { // Pass grant_id as a prop
 
   useEffect(() => {
     fetchAndClassifyEmails();
-  }, []);
+  }, [actualGrantId]);
 
   return (
     <View style={styles.container}>
