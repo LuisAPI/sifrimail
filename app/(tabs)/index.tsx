@@ -1,118 +1,101 @@
-import { Image, StyleSheet, Platform, Button, View, Text } from 'react-native';
-import { useEffect, useState } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import axios from 'axios';
+import Constants from 'expo-constants';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import EditScreenInfo from '@/components/EditScreenInfo';
+import { Text, View } from '@/components/Themed';
 
-import { Link } from 'expo-router';
-import EmailService from '../services/emailService';
-
-// Define the structure of the email object
-interface Email {
-  snippet: string;
-  // Add other properties here if necessary, like subject, from, etc.
-}
-
-export default function HomeScreen() {
-  // Use the Email type in the state definition
-  const [emails, setEmails] = useState<Email[]>([]);
+const Inbox = () => {
+  const [emails, setEmails] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const emailService = new EmailService('gmail'); // Or 'outlook'
+  const [error, setError] = useState<string | null>(null);
 
-  // Fetch emails on component mount
+  const fetchAndClassifyEmails = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const API_URL = Constants.expoConfig?.extra?.apiUrl; // Access API_URL safely
+
+      console.log('API_URL:', API_URL);
+      
+      // Fetch and classify emails using the API_URL
+      const emailResponse = await axios.get(`${API_URL}/nylas/recent-emails`);
+      const fetchedEmails = emailResponse.data;
+
+      const classificationResponse = await axios.post(`${API_URL}/classify-emails`, {
+        emails: fetchedEmails,
+      });
+      const classifiedEmails = classificationResponse.data.predictions;
+
+      const emailsWithClassification = fetchedEmails.map((email: any, index: number) => ({
+        ...email,
+        classification: classifiedEmails[index],
+      }));
+
+      setEmails(emailsWithClassification);
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadEmails = async () => {
-      try {
-        const messages = await emailService.fetchEmails();
-        setEmails(messages); // Store fetched emails in state
-      } catch (error) {
-        console.error('Failed to load emails:', error);
-      } finally {
-        setLoading(false); // Stop loading once done
-      }
-    };
-
-    loadEmails();
+    fetchAndClassifyEmails();
   }, []);
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ParallaxScrollView
-        headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-        headerImage={
-          <Image
-            source={require('@/assets/images/partial-react-logo.png')}
-            style={styles.reactLogo}
-          />
-        }
-      >
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="title">Welcome!</ThemedText>
-          <HelloWave />
-        </ThemedView>
-
-        {/* Display the inbox */}
-        <ThemedView style={styles.stepContainer}>
-          <ThemedText type="subtitle">Inbox</ThemedText>
-          {loading ? (
-            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-              <Text>Loading inbox...</Text>
-            </View>
-          ) : (
-            <View style={{ marginBottom: 12 }}>
-              {emails.length > 0 ? (
-                emails.map((email, index) => (
-                  <View key={index} style={{ marginBottom: 12, padding: 8, borderBottomWidth: 1 }}>
-                    <Text style={{ fontWeight: 'bold' }}>{email.snippet}</Text>
-                  </View>
-                ))
-              ) : (
-                <Text>No emails found</Text>
-              )}
+    <View style={styles.container}>
+      {loading ? (
+        <ActivityIndicator size="large" color="#007AFF" />
+      ) : error ? (
+        <Text style={styles.errorText}>{error}</Text>
+      ) : (
+        <FlatList
+          data={emails}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.emailCard}>
+              <Text style={styles.emailSubject}>{item.subject}</Text>
+              <Text style={styles.emailBody}>{item.body}</Text>
+              <Text style={styles.emailClassification}>Classification: {item.classification}</Text>
             </View>
           )}
-        </ThemedView>
+        />
+      )}
+    </View>
+  );
+};
 
-        {/* Keep the developer link to the playground accessible but hidden */}
-        <ThemedView style={styles.stepContainer}>
-          <ThemedText type="subtitle">
-            <Link href="../playgroundInbox">Click to move to Playground</Link>
-          </ThemedText>
-        </ThemedView>
+export default Inbox;
 
-        {/* Optional: You can add a button to toggle the inbox view */}
-        <ThemedView style={styles.stepContainer}>
-          <Button
-            title="Go to Playground"
-            onPress={() => {
-              // This is just for developer testing
-              console.log("Navigating to Playground");
-            }}
-          />
-        </ThemedView>
-      </ParallaxScrollView>
-    </SafeAreaView>
+/*
+export default function TabOneScreen() {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>aaaaa</Text>
+      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
+      <EditScreenInfo path="app/(tabs)/index.tsx" />
+    </View>
   );
 }
+*/
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: {
+    flex: 1,
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'center',
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  separator: {
+    marginVertical: 30,
+    height: 1,
+    width: '80%',
   },
 });
