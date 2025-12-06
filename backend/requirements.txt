@@ -4,3 +4,4 @@ nylas
 beautifulsoup4
 requests
 flask-cors
+werkzeug>=3.1.4 # not directly required, pinned by Snyk to avoid a vulnerability
